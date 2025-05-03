@@ -1,0 +1,6 @@
+[
+    {"id":"bronze1","name":"A. Novice","rarity":"Bronze","dribble":40,"speed":42,"pass":38,"shoot":35,"strength":45,"defense":40,"ovr":40,"attackNote":38,"defenseNote":42},
+    {"id":"silver1","name":"D. Promise","rarity":"Silver","dribble":60,"speed":62,"pass":65,"shoot":55,"strength":60,"defense":58,"ovr":60,"attackNote":59,"defenseNote":59},
+    {"id":"gold1","name":"G. Star","rarity":"Gold","dribble":85,"speed":88,"pass":82,"shoot":90,"strength":78,"defense":70,"ovr":82,"attackNote":85,"defenseNote":74}
+  ]
+  
