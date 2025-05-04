@@ -1,22 +1,41 @@
 import { club } from './main.js';
-export default class ReservePanel extends Phaser.GameObjects.Container{
-  constructor(scene){
-    super(scene,0,0);this.scene=scene;scene.add.existing(this);
-    this.bg=scene.add.rectangle(scene.scale.width/2,scene.scale.height/2,scene.scale.width,scene.scale.height,0x000000,0.9).setVisible(false).setDepth(7);
-    this.grid=scene.add.container(0,0).setDepth(8);
-    this.add([this.bg,this.grid]);
+import CardSprite from './CardSprite.js';
+
+export default class ReservePanel extends Phaser.GameObjects.Container {
+  constructor (scene) {
+    super(scene, 0, 0);
+    scene.add.existing(this);
+
+    this.bg = scene.add.graphics().setDepth(7);
+    this.cardsCont = scene.add.container(0, 0).setDepth(8);
+    this.add([this.bg, this.cardsCont]);
+
     this.setVisible(false);
   }
-  refresh(){
-    this.grid.removeAll(true);
-    club.forEach((card,idx)=>{
-      const col=idx%4,row=Math.floor(idx/4);
-      const x=60+col*110,y=100+row*140;
-      const rect=this.scene.add.rectangle(x,y,90,120,0x4455aa).setStrokeStyle(2,0xffffff);
-      const name=this.scene.add.text(x,y+70,card.name,{fontSize:'12px',align:'center'}).setOrigin(0.5);
-      this.grid.add([rect,name]);
+
+  drawTiles () {
+    this.bg.clear();
+    this.bg.fillStyle(0x333333, 1);
+    for (let y = 0; y < 800; y += 40) {
+      for (let x = 0; x < 480; x += 40) {
+        this.bg.fillRect(x, y, 39, 39);
+      }
+    }
+  }
+
+  refresh () {
+    this.drawTiles();
+    this.cardsCont.removeAll(true);
+
+    club.forEach((card, idx) => {
+      const col = idx % 4, row = Math.floor(idx / 4);
+      const x = 60 + col * 110, y = 100 + row * 140;
+      const s = new CardSprite(this.scene, card, 0.45)
+        .setPosition(x, y);
+      this.cardsCont.add(s);
     });
   }
-  hide(){this.setVisible(false);this.bg.setVisible(false);}
-  show(){this.setVisible(true);this.bg.setVisible(true);}
+
+  hide () { this.setVisible(false); }
+  show () { this.setVisible(true); }
 }
