@@ -1,60 +1,56 @@
-export default class GachaPopup extends Phaser.GameObjects.Container {
-    constructor(scene, cardData) {
-      super(scene, scene.game.config.width / 2, scene.game.config.height / 2);
-  
-      // 1) overlay pleine‑écran
-      this.overlay = scene.add.graphics()
-        .fillStyle(0x000000, 0.6)
-        .fillRect(0, 0, scene.game.config.width, scene.game.config.height)
-        .setInteractive()
-        .on('pointerdown', () => this.close()); // clic hors popup
-      scene.add.existing(this.overlay);         // sous le container
-  
-      // 2) cadre du popup
-      const bg = scene.add.rectangle(0, 0, 280, 380, 0x222222, 0.95)
-        .setStrokeStyle(4, 0xffffff)
-        .setOrigin(0.5);
-  
-      // 3) texte et stats
-      const title = scene.add.text(0, -150, cardData.name, {
-        fontSize: '22px', color: '#ffd700'
-      }).setOrigin(0.5);
-      const rarity = scene.add.text(0, -115, cardData.rarity, {
-        fontSize: '18px', color: '#ffddaa'
-      }).setOrigin(0.5);
-  
-      // 4) sprite carte (placeholder rectangle)
-      const cardSprite = scene.add.rectangle(0, 0, 160, 200, 0x4444aa)
-        .setStrokeStyle(2, 0xffffff);
-  
-      // 5) bouton OK
-      const btn = scene.add.text(0, 155, 'OK', {
-        fontSize: '20px', backgroundColor: '#008cff', padding: {x: 20, y: 8}
-      }).setOrigin(0.5).setInteractive({ useHandCursor: true })
-        .on('pointerdown', () => this.close());
-  
-      // 6) packer dans le container
-      this.add([bg, title, rarity, cardSprite, btn]);
-      this.setScale(0).setAlpha(0);             // départ invisible
-      scene.add.existing(this);
-  
-      // 7) animation d’apparition
-      scene.tweens.add({
-        targets: this,
-        alpha: 1,
-        scale: 1,
-        ease: 'Back.out', duration: 350
-      });
-    }
-  
-    close() {
-      this.scene.tweens.add({
-        targets: this,
-        alpha: 0,
-        scale: 0,
-        duration: 200,
-        onComplete: () => { this.overlay.destroy(); this.destroy(); }
-      });
-    }
+import { playerTeam, calcNotes } from "./main.js";
+
+export default class GachaPopup extends Phaser.GameObjects.Container{
+  constructor(scene, cardData){
+    super(scene, scene.scale.width/2, scene.scale.height/2);
+    this.cardData = cardData;
+
+    /* notes calculées */
+    const n = calcNotes(cardData);
+    cardData.ovr=n.ovr; cardData.attackNote=n.atk; cardData.defenseNote=n.def;
+
+    /* overlay cliquable */
+    this.overlay=scene.add.graphics()
+      .fillStyle(0x000000,0.65)
+      .fillRect(0,0,scene.scale.width,scene.scale.height)
+      .setInteractive()
+      .setDepth(1)
+      .on('pointerdown',()=>this.close());
+    scene.add.existing(this.overlay);
+
+    /* cadre */
+    const bg=scene.add.rectangle(0,0,300,440,0x222222,0.95)
+      .setStrokeStyle(4,0xffffff).setDepth(2);
+    const title=scene.add.text(0,-180,cardData.name,{fontSize:'22px',color:'#ffd700',fontStyle:'bold'}).setOrigin(0.5).setDepth(2);
+    const rarity=scene.add.text(0,-150,cardData.rarity,{fontSize:'18px',color:'#ffddaa'}).setOrigin(0.5).setDepth(2);
+    const cardRect=scene.add.rectangle(0,-20,170,220,0x4455aa).setStrokeStyle(2,0xffffff).setDepth(2);
+    const notesTxt=scene.add.text(0,110,`OVR ${n.ovr}\nATK ${n.atk}   DEF ${n.def}`,{fontSize:'18px',color:'#ffffff',align:'center'}).setOrigin(0.5).setDepth(2);
+
+    /* bouton ajouter */
+    const addBtn=scene.add.text(0,175,'Ajouter à l\'équipe',{fontSize:'18px',backgroundColor:'#00b347',padding:{x:12,y:6}})
+      .setOrigin(0.5).setDepth(2).setInteractive({useHandCursor:true})
+      .on('pointerdown',()=>this.addToTeam());
+
+    this.add([bg,title,rarity,cardRect,notesTxt,addBtn]);
+    this.setAlpha(0).setScale(0);
+    scene.add.existing(this);
+    scene.tweens.add({targets:this,alpha:1,scale:1,duration:300,ease:'Back.out'});
   }
-  
+
+  addToTeam(){
+    if(playerTeam.length>=5){ this.toast('Équipe pleine !',0xff3333); return; }
+    playerTeam.push(this.cardData);
+    this.toast('Ajouté !');
+    this.close();
+  }
+
+  toast(msg,color=0x008cff){
+    const t=this.scene.add.text(this.x,this.y+230,msg,{fontSize:'18px',backgroundColor:Phaser.Display.Color.IntegerToColor(color).rgba,padding:{x:10,y:4}})
+      .setOrigin(0.5).setDepth(3);
+    this.scene.tweens.add({targets:t,alpha:0,y:'-=40',duration:1200,onComplete:()=>t.destroy()});
+  }
+
+  close(){
+    this.scene.tweens.add({targets:this,alpha:0,scale:0,duration:200,onComplete:()=>{this.overlay.destroy();this.destroy();}});
+  }
+}
