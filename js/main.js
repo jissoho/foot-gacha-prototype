@@ -1,4 +1,6 @@
 import cards from "../assets/cards.json" assert { type: "json" };
+import GachaPopup from './GachaPopup.js';
+
 
 /* ---------- helpers ---------- */
 function weightedRandom(pool) {
@@ -16,8 +18,8 @@ class GachaScene extends Phaser.Scene {
       .on("pointerdown", () => {
         const pool = cards.map(c => ({ ...c, weight: {Bronze:60,Silver:25,Gold:15}[c.rarity] }));
         const drawn = weightedRandom(pool);
-        alert(`${drawn.name} (${drawn.rarity})\nOVR ${drawn.ovr}`);
-        this.scene.start("MatchScene", { card: drawn });
+        new GachaPopup(this, drawn);
+        this.scene.scene.start('MatchScene', { card: this.cardData });
       });
   }
 }
