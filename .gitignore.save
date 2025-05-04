@@ -1,4 +1,0 @@
-#   node_modules/ ← on gardenode_modules/
-***odules          # ne touche pas aux fichiers locaux
-git commit -m "chore: untrack node_modules"   # 1 commit propre
-

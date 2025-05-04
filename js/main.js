@@ -1,86 +1,101 @@
-/***** Persistance *****/
-export let coins = Number(localStorage.getItem('coins') || 0);
-export const playerTeam = JSON.parse(localStorage.getItem('team') || '[]');
-export const club       = JSON.parse(localStorage.getItem('club') || '[]');
-export function saveGame(){
-  localStorage.setItem('coins', coins);
-  localStorage.setItem('team',  JSON.stringify(playerTeam));
-  localStorage.setItem('club',  JSON.stringify(club));
+// js/main.js
+
+// Variables globales pour la réserve de cartes et l'équipe
+let cards = [];  // cartes dans la réserve (tableau d'objets joueurs)
+team = loadTeam();  // (la variable team est déclarée dans team.js)
+
+/**
+ * Affiche une section du jeu en fonction de l'onglet sélectionné.
+ * @param {string} sectionId - l'ID de la section à afficher
+ */
+function showSection(sectionId) {
+  // Masquer toutes les sections et enlever 'active' sur tous les boutons
+  document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+  document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+  // Afficher la section demandée
+  const sectionElem = document.getElementById(sectionId);
+  if (sectionElem) sectionElem.classList.add('active');
+  // Activer le bouton de menu correspondant
+  const menuBtn = document.querySelector(`.menu-btn[data-section="${sectionId}"]`);
+  if (menuBtn) menuBtn.classList.add('active');
 }
 
-/***** Helpers *****/
-export function calcNotes(c){
-  const ovr=Math.round((c.shoot+c.dribble+c.pass+c.speed+c.defense+c.strength)/6);
-  return{ovr, atk:Math.round(c.shoot*0.4+c.dribble*0.3+c.pass*0.3), def:Math.round(c.defense*0.6+c.strength*0.4)};
+/**
+ * Met à jour l'affichage de la réserve (grille des cartes) en fonction du tableau cards.
+ */
+function renderReserve() {
+  const reserveGrid = document.getElementById('reserveGrid');
+  reserveGrid.innerHTML = '';  // vider d'abord
+  // Pour chaque carte, créer son élément et l'ajouter à la grille
+  cards.forEach(player => {
+    const cardElem = createCardElement(player, true);
+    reserveGrid.appendChild(cardElem);
+  });
 }
-const weightedRandom=p=>{const t=p.reduce((s,c)=>s+c.weight,0);let r=Math.random()*t;return p.find(c=>(r-=c.weight)<0)};
 
-/***** Import jeux *****/
-import cards from '../assets/cards.json' assert{type:'json'};
-import GachaPopup from './GachaPopup.js';
-import TeamGrid   from './TeamGrid.js';
-import ReservePanel from './ReservePanel.js';
+/**
+ * Trie le tableau de cartes 'cards' selon le critère spécifié et réaffiche la grille.
+ * @param {string} criterion - "overall", "rarity", "atk" ou "def"
+ */
+function sortCards(criterion) {
+  if (criterion === 'rarity') {
+    // Trier par rareté selon l'ordre des raretés défini dans RARITIES
+    const rarityOrder = RARITIES.map(r => r.name);  // ex: ["Commun","Rare","Épique","Légendaire"]
+    cards.sort((a, b) => rarityOrder.indexOf(a.rarity) - rarityOrder.indexOf(b.rarity));
+  } else if (criterion === 'atk') {
+    cards.sort((a, b) => b.atk - a.atk);
+  } else if (criterion === 'def') {
+    cards.sort((a, b) => b.def - a.def);
+  } else {
+    // default "overall"
+    cards.sort((a, b) => b.overall - a.overall);
+  }
+  renderReserve();
+  renderTeam();  // ré-attacher correctement les cartes d'équipe dans les slots au besoin
+  saveCards(cards);
+}
 
-/***** Scene Pack (tirage) *****/
-class PackScene extends Phaser.Scene{
-  constructor(){super('PackScene');}
-  create(){
-    // lance popup dès qu'on clique sur l'onglet Pack (via UIScene)
-    this.events.on('invoke-pack',()=>{
-      const pool=cards.map(c=>({...c,weight:{Bronze:60,Silver:25,Gold:15}[c.rarity]}));
-      new GachaPopup(this, weightedRandom(pool));
+// Au chargement de la page, initialisation
+window.addEventListener('DOMContentLoaded', () => {
+  // Charger les cartes depuis le stockage local
+  cards = loadCards();
+  // Rendre la réserve initiale
+  renderReserve();
+  // Rendre l'équipe initiale
+  renderTeam();
+  // Gérer la navigation du menu
+  document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const section = btn.getAttribute('data-section');
+      showSection(section);
     });
-    this.teamGrid = new TeamGrid(this);   // terrain masqué par défaut
-    this.scene.launch('UIScene');
-  }
-}
-
-/***** Scene conteneur UI + bandeau *****/
-class UIScene extends Phaser.Scene{
-  constructor(){super('UIScene');}
-  create(){
-    const H = this.scale.height;
-    // bandeau noir
-    this.add.rectangle(this.scale.width/2,H-50,this.scale.width,100,0x000000,0.85).setDepth(5);
-
-    // référence aux éléments montrables
-    this.packScene = this.scene.get('PackScene');
-    this.teamGrid  = this.packScene.teamGrid;
-    this.reserve   = new ReservePanel(this);
-
-    // titre centre menu
-    this.menuText = this.add.text(this.scale.width/2,H/2,'Football Gacha Centre',{fontSize:'26px',fontStyle:'bold'}).setOrigin(0.5).setDepth(2);
-
-    /* ---- Onglets bandeau ---- */
-    const tabs=[
-      {label:'Centre', x:60,  cb:()=>this.showMenu()},
-      {label:'Pack',   x:180, cb:()=>this.invokePack()},
-      {label:'Équipe', x:300, cb:()=>this.showTeam()},
-      {label:'Réserve',x:420, cb:()=>this.showReserve()}
-    ];
-    tabs.forEach(t=>{
-      this.add.text(t.x,H-65,t.label,{fontSize:'16px'})
-        .setOrigin(0.5).setDepth(6).setInteractive({useHandCursor:true})
-        .on('pointerdown',t.cb);
-    });
-    this.showMenu();
-  }
-  hideAll(){
-    this.menuText.setVisible(false);
-    this.teamGrid.setVisible(false);
-    this.reserve.hide();
-  }
-  showMenu(){ this.hideAll(); this.menuText.setVisible(true);}  // juste le titre
-  invokePack(){ this.packScene.events.emit('invoke-pack'); }
-  showTeam(){ this.hideAll(); this.teamGrid.setVisible(true); this.teamGrid.refresh(); }
-  showReserve(){ this.hideAll(); this.reserve.refresh(); this.reserve.show(); }
-}
-
-/***** Phaser config *****/
-new Phaser.Game({
-  type:Phaser.AUTO,
-  width:480,
-  height:800,
-  parent:'game',
-  scene:[PackScene, UIScene]
+  });
+  // Gérer le bouton d'invocation
+  const invokeBtn = document.getElementById('invokeBtn');
+  invokeBtn.addEventListener('click', () => {
+    const resultContainer = document.getElementById('gachaResult');
+    resultContainer.innerHTML = '';  // clear previous result
+    // Tirer un nouveau joueur via le gacha
+    const newPlayer = rollGacha();
+    // Ajouter le joueur au tableau de cartes et sauvegarder
+    cards.push(newPlayer);
+    saveCards(cards);
+    // Créer l'élément de carte et l'afficher dans le résultat + l'ajouter à la réserve
+    const cardElem = createCardElement(newPlayer, true);
+    resultContainer.appendChild(cardElem);
+    // Également ajouter la carte dans la grille de réserve
+    const reserveGrid = document.getElementById('reserveGrid');
+    reserveGrid.appendChild(cardElem.cloneNode(true));  // ajouter une copie dans la réserve
+    // Re-bind drag events sur la copie (cloneNode ne copie pas les events)
+    const clonedCard = reserveGrid.lastElementChild;
+    clonedCard.addEventListener('dragstart', onCardDragStart);
+    clonedCard.addEventListener('dragend', onCardDragEnd);
+    // Mettre à jour l'affichage (tri éventuellement) - ici on peut simplement re-trier si la liste était triée
+    const sortSelect = document.getElementById('sortSelect');
+    sortCards(sortSelect.value);
+  });
+  // Gérer le changement de tri dans la réserve
+  document.getElementById('sortSelect').addEventListener('change', (e) => {
+    sortCards(e.target.value);
+  });
 });

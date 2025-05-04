@@ -1,8 +1,0 @@
-[
-  {"id":"bronze1","name":"A. Novice","rarity":"Bronze","dribble":40,"speed":42,"pass":38,"shoot":35,"strength":45,"defense":40},
-  {"id":"bronze2","name":"B. Trainee","rarity":"Bronze","dribble":41,"speed":40,"pass":39,"shoot":34,"strength":46,"defense":41},
-  {"id":"silver1","name":"C. Promise","rarity":"Silver","dribble":60,"speed":62,"pass":65,"shoot":55,"strength":60,"defense":58},
-  {"id":"silver2","name":"D. Talent","rarity":"Silver","dribble":63,"speed":61,"pass":64,"shoot":56,"strength":58,"defense":57},
-  {"id":"gold1","name":"E. Star","rarity":"Gold","dribble":85,"speed":88,"pass":82,"shoot":90,"strength":78,"defense":70},
-  {"id":"gold2","name":"F. Maestro","rarity":"Gold","dribble":87,"speed":84,"pass":86,"shoot":88,"strength":75,"defense":72}
-]

@@ -2,16 +2,93 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Foot Gacha Prototype</title>
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
-  <style>
-    body { margin: 0; background: #111; color: #fff; font-family: sans-serif; text-align: center; }
-    canvas { display: block; margin: 0 auto; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gacha Football - Jeu Web</title>
+  <!-- Feuille de style pour le design -->
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <h1>Foot Gacha Prototype</h1>
-  <div id="game"></div>
-  <script type="module" src="js/main.js"></script>
+
+  <!-- Menu principal de navigation -->
+  <nav class="main-menu">
+    <ul>
+      <li><button data-section="home" class="menu-btn active">Menu</button></li>
+      <li><button data-section="team" class="menu-btn">Équipe</button></li>
+      <li><button data-section="reserve" class="menu-btn">Réserve</button></li>
+      <li><button data-section="gacha" class="menu-btn">Invocation</button></li>
+    </ul>
+  </nav>
+
+  <!-- Section d'accueil (Menu) -->
+  <section id="home" class="section active">
+    <h1>Jeu Gacha de Football</h1>
+    <p>Bienvenue sur le jeu gacha de football ! Utilisez le menu pour naviguer.</p>
+  </section>
+
+  <!-- Section Équipe (composition des 8 joueurs) -->
+  <section id="team" class="section">
+    <h2>Mon Équipe (8 Joueurs)</h2>
+    <div class="team-formation">
+      <!-- Gardien -->
+      <div class="team-row single">
+        <div class="team-slot" data-position="GK" ondragover="event.preventDefault()" ondrop="onDropTeam(event)">
+          <span class="position-label">Gardien</span>
+        </div>
+      </div>
+      <!-- Défenseurs -->
+      <div class="team-row multiple">
+        <div class="team-slot" data-position="DEF1" ondragover="event.preventDefault()" ondrop="onDropTeam(event)"><span class="position-label">Défenseur</span></div>
+        <div class="team-slot" data-position="DEF2" ondragover="event.preventDefault()" ondrop="onDropTeam(event)"><span class="position-label">Défenseur</span></div>
+        <div class="team-slot" data-position="DEF3" ondragover="event.preventDefault()" ondrop="onDropTeam(event)"><span class="position-label">Défenseur</span></div>
+      </div>
+      <!-- Milieux -->
+      <div class="team-row multiple">
+        <div class="team-slot" data-position="MID1" ondragover="event.preventDefault()" ondrop="onDropTeam(event)"><span class="position-label">Milieu</span></div>
+        <div class="team-slot" data-position="MID2" ondragover="event.preventDefault()" ondrop="onDropTeam(event)"><span class="position-label">Milieu</span></div>
+        <div class="team-slot" data-position="MID3" ondragover="event.preventDefault()" ondrop="onDropTeam(event)"><span class="position-label">Milieu</span></div>
+      </div>
+      <!-- Attaquant -->
+      <div class="team-row single">
+        <div class="team-slot" data-position="FWD" ondragover="event.preventDefault()" ondrop="onDropTeam(event)">
+          <span class="position-label">Attaquant</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Réserve (cartes possédées) -->
+  <section id="reserve" class="section">
+    <h2>Ma Réserve de Joueurs</h2>
+    <!-- Options de tri -->
+    <div class="reserve-controls">
+      <label for="sortSelect">Trier par :</label>
+      <select id="sortSelect">
+        <option value="overall">Note globale</option>
+        <option value="rarity">Rareté</option>
+        <option value="atk">Attaque (ATK)</option>
+        <option value="def">Défense (DEF)</option>
+      </select>
+    </div>
+    <!-- Grille des cartes de joueurs -->
+    <div id="reserveGrid" class="reserve-grid">
+      <!-- Les cartes seront insérées ici par JavaScript -->
+    </div>
+  </section>
+
+  <!-- Section Invocation (Gacha) -->
+  <section id="gacha" class="section">
+    <h2>Invocation de Joueur</h2>
+    <p>Obtenez un nouveau joueur aléatoire via le gacha :</p>
+    <button id="invokeBtn" class="invoke-button">Invoquer un joueur</button>
+    <div id="gachaResult" class="gacha-result">
+      <!-- Le résultat (carte tirée) s'affichera ici temporairement -->
+    </div>
+  </section>
+
+  <!-- Inclusion des scripts JavaScript -->
+  <script src="js/gacha.js"></script>
+  <script src="js/team.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

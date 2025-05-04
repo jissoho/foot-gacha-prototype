@@ -1,0 +1,196 @@
+/* === Styles généraux === */
+body {
+    font-family: Arial, sans-serif;  /* Police simple et lisible */
+    margin: 0;
+    background: #f0f0f0;
+  }
+  h1, h2 {
+    text-align: center;
+  }
+  section {
+    display: none;  /* Les sections sont masquées par défaut, sauf celle active */
+    padding: 1em;
+  }
+  section.active {
+    display: block; /* Section visible */
+  }
+  .main-menu {
+    background: #222;
+    color: #fff;
+  }
+  .main-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .main-menu li {
+    margin: 0;
+    padding: 0;
+  }
+  .main-menu .menu-btn {
+    background: #222;
+    color: #fff;
+    padding: 0.8em 1em;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+  }
+  .main-menu .menu-btn:hover {
+    background: #444;
+  }
+  .main-menu .menu-btn.active {
+    background: #555;
+  }
+  
+  /* === Section Équipe (formation 3-3-1 + GK) === */
+  .team-formation {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .team-row {
+    display: flex;
+    justify-content: center;
+    margin: 0.5em 0;
+  }
+  .team-row.multiple .team-slot {
+    /* Plusieurs slots sur la même ligne (défenseurs, milieux) */
+    margin: 0 0.5em;
+  }
+  .team-row.single .team-slot {
+    /* Slot unique (gardien, attaquant) */
+    margin: 0 0.5em;
+  }
+  .team-slot {
+    background: #ccc;
+    width: 100px;
+    height: 140px;
+    border: 2px dashed #999;
+    border-radius: 8px;
+    position: relative;
+    text-align: center;
+    font-size: 0.9em;
+    color: #333;
+  }
+  .team-slot.filled {
+    border-style: solid;  /* Si rempli, on peut changer le style (défini via JS) */
+  }
+  .position-label {
+    position: absolute;
+    bottom: 4px;
+    left: 0; right: 0;
+    font-size: 0.8em;
+    color: #333;
+  }
+  
+  /* Carte insérée dans un slot d'équipe */
+  .team-slot .card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+  
+  /* === Section Réserve (grille de cartes) === */
+  .reserve-controls {
+    text-align: center;
+    margin-bottom: 0.5em;
+  }
+  .reserve-controls select {
+    padding: 0.2em;
+  }
+  .reserve-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0.5em;
+  }
+  .card {
+    background: #fff;
+    border: 2px solid #666;
+    border-radius: 8px;
+    padding: 0.4em;
+    text-align: center;
+    font-size: 0.9em;
+    line-height: 1.2em;
+    cursor: grab;            /* Curseur "main" pour indiquer qu'on peut drag */
+  }
+  .card:active {
+    cursor: grabbing;
+  }
+  .card.dragging {
+    opacity: 0.5;            /* Visuel de la carte quand on la dragge */
+  }
+  .card .name {
+    font-weight: bold;
+    display: block;
+  }
+  .card .overall {
+    font-size: 1.2em;
+    margin: 0.2em 0;
+  }
+  .card .stats {
+    font-size: 0.8em;
+  }
+  .card .stats .atk {
+    color: #c33;             /* ATK en rouge */
+    font-weight: bold;
+  }
+  .card .stats .def {
+    color: #339;             /* DEF en bleu */
+    font-weight: bold;
+  }
+  .card.common     { border-color: #999; }   /* Couleur de bordure selon rareté */
+  .card.rare       { border-color: #3a5; }
+  .card.epic       { border-color: #63c; }
+  .card.legendary  { border-color: #d90; }
+  
+  /* === Section Invocation (résultat) === */
+  .invoke-button {
+    display: block;
+    margin: 0.5em auto;
+    padding: 0.6em 1em;
+    font-size: 1em;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .invoke-button:hover {
+    background: #45a049;
+  }
+  .gacha-result {
+    text-align: center;
+    margin-top: 1em;
+  }
+  .gacha-result .card {
+    /* La carte résultat en invocation, on peut la mettre en avant */
+    animation: blink 0.5s alternate 3 ease-in-out;
+    margin: 0 auto;
+  }
+  /* Animation blink pour faire clignoter la carte obtenue */
+  @keyframes blink {
+    from { opacity: 1; }
+    to   { opacity: 0.1; }
+  }
+  
+  /* === Responsive Design === */
+  /* Sur écrans très étroits, on peut ajuster la grille de réserve */
+  @media (max-width: 500px) {
+    .reserve-grid {
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+    .team-slot {
+      width: 80px;
+      height: 110px;
+    }
+    .position-label {
+      font-size: 0.7em;
+    }
+  }
+  
